@@ -1,0 +1,23 @@
+{% load django_htmx static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block css %}
+    {% endblock %}
+    <title>{% block title %}Minimum Task{% endblock %}</title>
+    {% htmx_script %}
+</head>
+
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+    <div id="sidebar">
+        {% block sidebar %}
+        {% endblock %}
+    </div>
+
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

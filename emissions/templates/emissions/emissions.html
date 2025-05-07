@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/emissions.css' %}">
+{% endblock %}
+
+{% block content %}
+  <h1>Emissions Viewer</h1>
+
+  <div id="table-container"
+       hx-get="{% url 'emission_table' %}"
+       hx-trigger="load"
+       hx-indicator="#loading">
+    No data available
+  </div>
+{% endblock %}

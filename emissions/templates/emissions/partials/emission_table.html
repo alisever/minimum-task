@@ -1,0 +1,136 @@
+<div id="emissions-content">
+  <div class="filters">
+    <form hx-get="{% url 'emission_table' %}" hx-target="#table-container" hx-trigger="change" class="filter-form">
+      <label for="scope">Scope:</label>
+      <select name="scope" id="scope">
+        <option value="">All</option>
+        {% for s in scope_options %}
+          <option value="{{ s }}" {% if scope == s|stringformat:"s" %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="category">Category:</label>
+      <select name="category" id="category">
+        <option value="">All</option>
+        {% for c in category_options %}
+          <option value="{{ c }}" {% if category == c|stringformat:"s" %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+
+      <input type="hidden" name="ordering" value="{{ request.GET.ordering }}">
+      <button type="button"
+              hx-get="{% url 'emission_table' %}"
+              hx-target="#table-container"
+              hx-swap="innerHTML"
+              onclick="document.getElementById('filter-form').reset();">
+        Reset Filters
+      </button>
+    </form>
+  </div>
+
+  <div class="total-co2e">
+    <strong>Total CO₂e:</strong> {{ total_co2e|floatformat:2 }} kg
+  </div>
+
+  <h3>CO₂e by Activity</h3>
+  <table class="grouped-summary">
+    <thead>
+      <tr>
+        <th>Activity</th>
+        <th>Total CO₂e (kg)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in co2e_by_activity %}
+        <tr>
+          <td>{{ row.activity }}</td>
+          <td>{{ row.total_co2e|floatformat:2 }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">No emissions to summarize.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div id="table-container">
+    <table>
+      <colgroup>
+        <col style="width: 20%;">
+        <col style="width: 25%;">
+        <col style="width: 20%;">
+        <col style="width: 15%;">
+        <col style="width: 20%;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Activity</th>
+          <th>
+            {% if request.GET.ordering == 'co2e' %}
+              <a href="#"
+                 hx-get="{% url 'emission_table' %}?ordering=-co2e{% if request.GET.scope %}&scope={{ request.GET.scope }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}"
+                 hx-target="#table-container">
+                CO₂e ↑
+              </a>
+            {% elif request.GET.ordering == '-co2e' %}
+              <a href="#"
+                 hx-get="{% url 'emission_table' %}{% if request.GET.scope or request.GET.category %}?{% endif %}{% if request.GET.scope %}scope={{ request.GET.scope }}{% endif %}{% if request.GET.category %}{% if request.GET.scope %}&{% endif %}category={{ request.GET.category }}{% endif %}"
+                 hx-target="#table-container">
+                CO₂e ↓
+              </a>
+            {% else %}
+              <a href="#"
+                 hx-get="{% url 'emission_table' %}?ordering=co2e{% if request.GET.scope %}&scope={{ request.GET.scope }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}"
+                 hx-target="#table-container">
+                CO₂e
+              </a>
+            {% endif %}
+          </th>
+          <th>Scope</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for emission in emissions %}
+          <tr>
+            <td>{{ emission.date }}</td>
+            <td>{{ emission.activity }}</td>
+            <td>{{ emission.co2e }}</td>
+            <td>{{ emission.scope }}</td>
+            <td>{{ emission.category }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">No emissions matching these criteria were found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+      <a href="#"
+         hx-get="{% url 'emission_table' %}?page={{ page_obj.previous_page_number }}{% if request.GET.scope %}&scope={{ request.GET.scope }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.ordering %}&ordering={{ request.GET.ordering }}{% endif %}"
+         hx-target="#table-container"
+         class="pagination-link">
+        &laquo; Previous
+      </a>
+    {% else %}
+      <span class="pagination-link disabled">&laquo; Previous</span>
+    {% endif %}
+
+    <span class="page-info">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      ({{ paginator.count }} items in total)
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="#"
+         hx-get="{% url 'emission_table' %}?page={{ page_obj.next_page_number }}{% if request.GET.scope %}&scope={{ request.GET.scope }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.ordering %}&ordering={{ request.GET.ordering }}{% endif %}"
+         hx-target="#table-container"
+         class="pagination-link">
+        Next &raquo;
+      </a>
+    {% else %}
+      <span class="pagination-link disabled">Next &raquo;</span>
+    {% endif %}
+  </div>
+</div>

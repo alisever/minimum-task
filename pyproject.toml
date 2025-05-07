@@ -1,0 +1,19 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "F",
+    "E",
+    "W",
+    "I",
+    "N",
+    "A",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*migrations*" = ["E501", "I"]
+"__init__.py" = ["F401", "F403"]
